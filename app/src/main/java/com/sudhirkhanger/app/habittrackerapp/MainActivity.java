@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,12 +34,14 @@ public class MainActivity extends AppCompatActivity {
                 HabitContract.MeditationEntry.COLUMN_DATE,
                 HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH};
 
-        insert();
+//        insert("Yes", 4);
 //        update();
 //        delete();
 //        deleteDatabase();
-//        logQueryResults(query());
+//        deleteAll();
+        logQueryResults(queryAll());
 //        logQueryResults(queryWhere());
+//        logQueryResults(rubricCompliantQuery());
     }
 
     /*
@@ -53,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
 
     /*
      * Returns all rows
+     * Uses content provider no need to get
+     * readable database
      */
-    private Cursor query() {
+    private Cursor queryAll() {
         return mContentResolver.query(
                 HabitContract.MeditationEntry.CONTENT_URI,
                 projection,
@@ -64,8 +69,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
+     * Follows rubric
+     * returns Cursor
+     * gets a readable data storage
+     */
+    private Cursor rubricCompliantQuery() {
+        SQLiteDatabase db = new HabitDbHelper(this).getReadableDatabase();
+        return db.query(
+                HabitContract.MeditationEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
+    }
+
+    /*
      * Will return rows with particular selection arguments
      * Make sure to append L for long in date
+     * Also change the time stamp based on data on your system
      */
     private Cursor queryWhere() {
         return mContentResolver.query(
@@ -91,31 +114,43 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    /*
+     * update the uri based on data on your system
+     */
     private void update() {
         mContentValues.clear();
-        mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, "No");
-        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 0);
-        Uri uri = ContentUris.withAppendedId(HabitContract.MeditationEntry.CONTENT_URI, 20160917020600L);
+        mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, "Yes");
+        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 8);
+        Uri uri = ContentUris.withAppendedId(HabitContract.MeditationEntry.CONTENT_URI, 20160917104605L);
         int rowsUpdated = mContentResolver.update(uri, mContentValues, null, null);
         Log.d(LOG_TAG, "Rows updated: " + rowsUpdated);
     }
 
-    private void insert() {
+    private void insert(String yesOrNo, int time) {
         mContentValues.clear();
-        mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, "Yes");
-        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 16);
+        mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, yesOrNo);
+        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, time);
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_DATE, getCurrentTime());
         mContentResolver.insert(HabitContract.MeditationEntry.CONTENT_URI, mContentValues);
     }
 
     // Make sure to append L for long in date
+    // update time stamp as per your system
     private void delete() {
         int rowsDeleted;
         rowsDeleted = mContentResolver.delete(
                 HabitContract.MeditationEntry.CONTENT_URI,
                 HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
-                new String[]{"20160917080554L"});
+                new String[]{"20160917104325L"});
+        Log.d(LOG_TAG, "# of Rows Deleted: " + rowsDeleted);
+    }
+
+    private void deleteAll() {
+        int rowsDeleted;
+        rowsDeleted = mContentResolver.delete(
+                HabitContract.MeditationEntry.CONTENT_URI,
+                null,
+                null);
         Log.d(LOG_TAG, "# of Rows Deleted: " + rowsDeleted);
     }
 

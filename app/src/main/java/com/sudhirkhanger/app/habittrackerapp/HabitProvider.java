@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 public class HabitProvider extends ContentProvider {
 
@@ -61,11 +62,12 @@ public class HabitProvider extends ContentProvider {
                         sortOrder);
                 return retCursor;
             case MEDITATION_ID:
+                String id = String.valueOf(ContentUris.parseId(uri)) + "L";
                 retCursor = mHabitDbHelper.getReadableDatabase().query(
                         HabitContract.MeditationEntry.TABLE_NAME,
                         projection,
                         HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
-                        new String[]{String.valueOf(ContentUris.parseId(uri))},
+                        new String[]{id},
                         null,
                         null,
                         sortOrder);
@@ -123,14 +125,17 @@ public class HabitProvider extends ContentProvider {
 
         switch (match) {
             case MEDITATION:
+                Log.d(LOG_TAG, "delete() dir");
                 numDeleted = db.delete(
                         HabitContract.MeditationEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             case MEDITATION_ID:
+                Log.d(LOG_TAG, "delete() type");
+                String id = String.valueOf(ContentUris.parseId(uri)) + "L";
                 numDeleted = db.delete(
                         HabitContract.MeditationEntry.TABLE_NAME,
                         HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
-                        new String[]{String.valueOf(ContentUris.parseId(uri))});
+                        new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -145,7 +150,7 @@ public class HabitProvider extends ContentProvider {
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mHabitDbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
-        int numUpdated = 0;
+        int numUpdated;
 
         if (contentValues == null) {
             throw new IllegalArgumentException("Cannot have null content values");
@@ -153,13 +158,14 @@ public class HabitProvider extends ContentProvider {
 
         switch (match) {
             case MEDITATION:
+                Log.d(LOG_TAG, "update() Dir");
                 numUpdated = db.update(HabitContract.MeditationEntry.TABLE_NAME,
                         contentValues,
                         selection,
                         selectionArgs);
                 break;
             case MEDITATION_ID:
-                String id = String.valueOf(ContentUris.parseId(uri));
+                String id = String.valueOf(ContentUris.parseId(uri)) + "L";
                 numUpdated = db.update(HabitContract.MeditationEntry.TABLE_NAME,
                         contentValues,
                         HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
