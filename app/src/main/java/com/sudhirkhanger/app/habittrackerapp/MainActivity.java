@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 //        insert();
 //        update();
 //        logQueryResults(query());
-        logQueryResults(queryWhere());
+//        logQueryResults(queryWhere());
     }
 
     private String getCurrentTime() {
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         return mContentResolver.query(
                 HabitContract.MeditationEntry.CONTENT_URI,
                 projection,
-                HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH,
+                HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH + " = ?",
                 new String[]{"15"},
                 null);
     }
@@ -93,5 +93,9 @@ public class MainActivity extends AppCompatActivity {
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 15);
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_DATE, getCurrentTime());
         mContentResolver.insert(HabitContract.MeditationEntry.CONTENT_URI, mContentValues);
+    }
+
+    private void delete() {
+        
     }
 }
