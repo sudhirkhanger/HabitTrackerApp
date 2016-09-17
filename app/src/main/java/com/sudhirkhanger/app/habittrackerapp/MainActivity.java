@@ -33,12 +33,17 @@ public class MainActivity extends AppCompatActivity {
                 HabitContract.MeditationEntry.COLUMN_DATE,
                 HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH};
 
-//        insert();
+        insert();
 //        update();
+//        delete();
+//        deleteDatabase();
 //        logQueryResults(query());
 //        logQueryResults(queryWhere());
     }
 
+    /*
+     * Get current time in YYYYMMDDHHMMSS format
+     */
     private String getCurrentTime() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat mdformat = new SimpleDateFormat("yyyyMMddhhmmss", Locale.US);
@@ -46,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         return timestamp;
     }
 
+    /*
+     * Returns all rows
+     */
     private Cursor query() {
         return mContentResolver.query(
                 HabitContract.MeditationEntry.CONTENT_URI,
@@ -55,15 +63,20 @@ public class MainActivity extends AppCompatActivity {
                 null);
     }
 
+    /*
+     * Will return rows with particular selection arguments
+     * Make sure to append L for long in date
+     */
     private Cursor queryWhere() {
         return mContentResolver.query(
                 HabitContract.MeditationEntry.CONTENT_URI,
                 projection,
-                HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH + " = ?",
-                new String[]{"15"},
+                HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
+                new String[]{"20160917080554L"},
                 null);
     }
 
+    // Simple logger
     private void logQueryResults(Cursor cursor) {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
@@ -78,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     private void update() {
         mContentValues.clear();
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, "No");
@@ -90,12 +104,23 @@ public class MainActivity extends AppCompatActivity {
     private void insert() {
         mContentValues.clear();
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_DID_MEDITATION, "Yes");
-        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 15);
+        mContentValues.put(HabitContract.MeditationEntry.COLUMN_MEDITATION_LENGTH, 16);
         mContentValues.put(HabitContract.MeditationEntry.COLUMN_DATE, getCurrentTime());
         mContentResolver.insert(HabitContract.MeditationEntry.CONTENT_URI, mContentValues);
     }
 
+    // Make sure to append L for long in date
     private void delete() {
-        
+        int rowsDeleted;
+        rowsDeleted = mContentResolver.delete(
+                HabitContract.MeditationEntry.CONTENT_URI,
+                HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
+                new String[]{"20160917080554L"});
+        Log.d(LOG_TAG, "# of Rows Deleted: " + rowsDeleted);
+    }
+
+    // Delete the whole database
+    private void deleteDatabase() {
+        new HabitDbHelper(this).deleteDatabase(this);
     }
 }

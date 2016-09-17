@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 public class HabitProvider extends ContentProvider {
 
@@ -46,9 +45,10 @@ public class HabitProvider extends ContentProvider {
                         String[] selectionArgs,
                         String sortOrder) {
         Cursor retCursor;
-        Log.d(LOG_TAG, "query() URI: " + uri);
-        Log.d(LOG_TAG, "query() Selection: " + selection);
-        Log.d(LOG_TAG, "query() SelectionArgs: " + selectionArgs[0]);
+
+        //TODO: REMOVE THIS
+//        Log.d(LOG_TAG, "query(): where " + selection + " is " + selectionArgs[0]);
+
         switch (sUriMatcher.match(uri)) {
             case MEDITATION:
                 retCursor = mHabitDbHelper.getReadableDatabase().query(
@@ -118,23 +118,25 @@ public class HabitProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         int numDeleted;
 
+        //TODO REMOVE THIS
+//        Log.d(LOG_TAG, "delete(): where " + selection + " is " + selectionArgs[0]);
+
         switch (match) {
             case MEDITATION:
                 numDeleted = db.delete(
                         HabitContract.MeditationEntry.TABLE_NAME, selection, selectionArgs);
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        HabitContract.MeditationEntry.TABLE_NAME + "'");
                 break;
             case MEDITATION_ID:
                 numDeleted = db.delete(
                         HabitContract.MeditationEntry.TABLE_NAME,
                         HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))});
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        HabitContract.MeditationEntry.TABLE_NAME + "'");
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (numDeleted > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
         }
         return numDeleted;
     }
@@ -158,7 +160,6 @@ public class HabitProvider extends ContentProvider {
                 break;
             case MEDITATION_ID:
                 String id = String.valueOf(ContentUris.parseId(uri));
-                Log.d(LOG_TAG, "update id: " + id);
                 numUpdated = db.update(HabitContract.MeditationEntry.TABLE_NAME,
                         contentValues,
                         HabitContract.MeditationEntry.COLUMN_DATE + " = ?",
